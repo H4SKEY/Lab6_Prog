@@ -51,22 +51,27 @@ public class Client {
 
                     AbstractCommand command = commandManager.getCommands().get(commandName);
                     if (command != null) {
-                        Request request;
-                        if (commandManager.getCommandsWithTicket().containsKey(commandName)) {
-                            Object ticket = inputManager.readTicket();
-                            request = new Request(command, commandArgs, ticket);
-                        } else if (commandManager.getCommandsWithPerson().containsKey(commandName)) {
-                            Object person = inputManager.readPerson();
-                            request = new Request(command, commandArgs, person);
+                        if (commandName.equals("execute_script")) {
+                            String line = command.execute(commandArgs, null);
+                            execute_script(line, socketChannel);
                         } else {
-                            request = new Request(command, commandArgs, null);
-                        }
+                            Request request;
+                            if (commandManager.getCommandsWithTicket().containsKey(commandName)) {
+                                Object ticket = inputManager.readTicket();
+                                request = new Request(command, commandArgs, ticket);
+                            } else if (commandManager.getCommandsWithPerson().containsKey(commandName)) {
+                                Object person = inputManager.readPerson();
+                                request = new Request(command, commandArgs, person);
+                            } else {
+                                request = new Request(command, commandArgs, null);
+                            }
 
-                        sendRequest(socketChannel, request);
-                        String response = readResponse(socketChannel);
-                        System.out.println(response);
-                        if (commandName.equals("exit")) {
-                            return;
+                            sendRequest(socketChannel, request);
+                            String response = readResponse(socketChannel);
+                            System.out.println(response);
+                            if (commandName.equals("exit")) {
+                                return;
+                            }
                         }
                     } else {
                         System.out.println("Неизвестная команда. Введите 'help' для списка команд.");
@@ -79,6 +84,41 @@ public class Client {
                     Thread.sleep(5000);
                 } catch (InterruptedException ignored) {
                 }
+            }
+        }
+    }
+
+
+
+    private void execute_script(String line, SocketChannel socketChannel) throws IOException, ClassNotFoundException {
+        String[] inputs = line.split("\n");
+        for (String input : inputs) {
+
+            String[] parts = input.split("\\s+", 2);
+            String commandName = parts[0].toLowerCase();
+            String[] commandArgs = parts.length > 1 ? parts[1].split("\\s+") : new String[0];
+
+            AbstractCommand command = commandManager.getCommands().get(commandName);
+            if (command != null) {
+                Request request;
+                if (commandManager.getCommandsWithTicket().containsKey(commandName)) {
+                    Object ticket = inputManager.readTicket();
+                    request = new Request(command, commandArgs, ticket);
+                } else if (commandManager.getCommandsWithPerson().containsKey(commandName)) {
+                    Object person = inputManager.readPerson();
+                    request = new Request(command, commandArgs, person);
+                } else {
+                    request = new Request(command, commandArgs, null);
+                }
+
+                sendRequest(socketChannel, request);
+                String response = readResponse(socketChannel);
+                System.out.println(response);
+                if (commandName.equals("exit")) {
+                    return;
+                }
+            } else {
+                System.out.println("Неизвестная команда. Введите 'help' для списка команд.");
             }
         }
     }

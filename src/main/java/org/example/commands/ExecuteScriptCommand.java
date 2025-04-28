@@ -35,38 +35,39 @@ public class ExecuteScriptCommand extends AbstractCommand implements Serializabl
             while (scriptScanner.hasNextLine()) {
                 String line = scriptScanner.nextLine().trim();
                 if (line.isEmpty() || line.startsWith("#")) continue;
+                result.append(line).append("\n");
+                //result.append("Выполняю: ").append(line).append("\n");
+//                String[] parts = line.split(" ", 2);
+//                String commandName = parts[0].toLowerCase();
+//                String[] commandArgs = parts.length > 1 ? parts[1].split(" ") : new String[0];
 
-                result.append("Выполняю: ").append(line).append("\n");
-                String[] parts = line.split(" ", 2);
-                String commandName = parts[0].toLowerCase();
-                String[] commandArgs = parts.length > 1 ? parts[1].split(" ") : new String[0];
-
-                if (commandName.equals("execute_script")) {
-                    result.append("Ошибка: Рекурсивный вызов скриптов запрещен\n");
-                    continue;
-                }
-
-                AbstractCommand command = commands.get(commandName);
-                if (command != null) {
-                    command.setCollectionManager(collectionManager);
-                    if (commandManager.getCommandsWithTicket().containsValue(command)) {
-                        result.append("Для команды ").append(commandName).append(" требуется ввод Ticket\n");
-                    } else if (commandManager.getCommandsWithPerson().containsValue(command)) {
-                        result.append("Для команды ").append(commandName).append(" требуется ввод Person\n");
-                    } else {
-                        result.append(command.execute(commandArgs, null)).append("\n");
-                    }
-                    if (commandName.equals("exit")) {
-                        return result.toString();
-                    }
-                } else {
-                    result.append("Неизвестная команда: ").append(commandName).append("\n");
-                }
+//                if (commandName.equals("execute_script")) {
+//                    //result.append("Ошибка: Рекурсивный вызов скриптов запрещен\n");
+//                    continue;
+//                }
+//
+//                AbstractCommand command = commands.get(commandName);
+//                if (command != null) {
+//                    command.setCollectionManager(collectionManager);
+//                    if (commandManager.getCommandsWithTicket().containsValue(command)) {
+//                        result.append("Для команды ").append(commandName).append(" требуется ввод Ticket\n");
+//                    } else if (commandManager.getCommandsWithPerson().containsValue(command)) {
+//                        result.append("Для команды ").append(commandName).append(" требуется ввод Person\n");
+//                    } else {
+//                        result.append(command.execute(commandArgs, null)).append("\n");
+//                    }
+//                    if (commandName.equals("exit")) {
+//                        return result.toString();
+//                    }
+//            }
+//                else {
+//                    result.append("Неизвестная команда: ").append(commandName).append("\n");
+//                }
             }
         } catch (FileNotFoundException e) {
-            result = new StringBuilder("Файл скрипта не найден: " + filename);
+            //result = new StringBuilder("Файл скрипта не найден: " + filename);
         } catch (Exception e) {
-            result = new StringBuilder("Ошибка выполнения скрипта: " + e.getMessage());
+            //result = new StringBuilder("Ошибка выполнения скрипта: " + e.getMessage());
         }
         return result.toString();
     }
